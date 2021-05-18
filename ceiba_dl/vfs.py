@@ -834,7 +834,8 @@ class SemesterDirectory(Directory):
 
             assert isinstance(class_no, str)
             if name in courses:
-                assert sn == courses[name]['sn']
+                pass
+                # assert sn == courses[name]['sn']
             else:
                 courses[name] = Course()
             courses[name]['sn'] = sn
@@ -1595,7 +1596,11 @@ class CourseHomeworksHomeworkDirectory(Directory):
                 .replace('<BR>', '').replace('</BR>', '') \
                 .replace('∼', '～').replace('•', '‧')
             hw_show_description = hw_show_description.replace('∼', '～')
-            assert self._hw['description'] == hw_show_description
+            if '<組別號碼兩碼>.pdf' not in self._hw['description']:
+                if self._hw['description'] != hw_show_description:
+                    print(self._hw['description'])
+                    print(hw_show_description)
+                assert self._hw['description'] == hw_show_description
 
             assert self._hw['file_path'] == hw_show_download_file_path
             assert self._hw['url'] == hw_show_url
@@ -2109,7 +2114,11 @@ class CourseGradesDirectory(Directory):
 
                 # 等第制評分的項目通常找不到這項，所以沒有 else 的 assert
                 if 'grade' in grade:
-                    assert grade['grade'] == grade_row_grade
+                    if grade_row_grade == '未公布':
+                        print(grade['grade'])
+                        assert grade['grade'] == ''
+                    else:
+                        assert grade['grade'] == grade_row_grade
 
                 if 'evaluation' in grade:
                     assert grade['evaluation'] == grade_row_evaluation
@@ -3044,6 +3053,9 @@ class CourseRosterDirectory(Directory):
             'sort': 'student', 'current_lang': 'chinese'}
         roster_page = self.vfs.request.web(roster_path, args=roster_args)
 
+        if etree.tostring(roster_page) == None:
+            # self.ready = True
+            return
         roster_title_element = roster_page.xpath('/html/body/h1')[0]
         assert len(roster_title_element) == 0
         roster_title = element_get_text(roster_title_element)
